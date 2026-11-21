@@ -10,6 +10,7 @@ import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/status_badge.dart';
 import '../../room/presentation/quick_payment_dialog.dart';
 import '../../payment/presentation/payment_sheet.dart';
+import '../../whatsapp/presentation/send_reminder_sheet.dart';
 import '../models/invoice_model.dart';
 
 /// Screen displaying the full itemized breakdown of a monthly rent bill
@@ -395,6 +396,44 @@ class InvoiceDetailScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 10),
             ],
+
+            // Send / Share on WhatsApp Button
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size.fromHeight(48),
+                backgroundColor: const Color(0xFF16A34A), // WhatsApp Green
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              icon: const Icon(Icons.chat_bubble_rounded),
+              label: const Text(
+                'Send WhatsApp Rent Bill (1-Tap)',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
+              onPressed: () {
+                final meterReading = state.meterReadings.isNotEmpty
+                    ? state.meterReadings.lastWhere(
+                        (mr) => mr.roomId == room.id,
+                        orElse: () => state.meterReadings.last,
+                      )
+                    : null;
+
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                  ),
+                  builder: (ctx) => SendReminderSheet(
+                    invoice: invoice,
+                    tenant: tenant,
+                    room: room,
+                    meterReading: meterReading,
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 10),
 
             // Copy WhatsApp Bill Summary Button
             OutlinedButton.icon(
