@@ -9,6 +9,8 @@ import '../../features/meter/models/meter_reading_model.dart';
 import '../../features/invoice/models/invoice_model.dart';
 import '../../features/payment/models/payment_model.dart';
 import '../../features/invoice/domain/invoice_generator.dart';
+import '../../features/expenses/models/expense_model.dart';
+import '../../features/expenses/domain/expense_calculator.dart';
 
 /// Immutable state holder for the complete RentKhata offline database
 class RentKhataState {
@@ -19,6 +21,7 @@ class RentKhataState {
   final List<MeterReadingModel> meterReadings;
   final List<InvoiceModel> invoices;
   final List<PaymentModel> payments;
+  final List<ExpenseModel> expenses;
 
   const RentKhataState({
     this.properties = const [],
@@ -28,6 +31,7 @@ class RentKhataState {
     this.meterReadings = const [],
     this.invoices = const [],
     this.payments = const [],
+    this.expenses = const [],
   });
 
   RentKhataState copyWith({
@@ -38,6 +42,7 @@ class RentKhataState {
     List<MeterReadingModel>? meterReadings,
     List<InvoiceModel>? invoices,
     List<PaymentModel>? payments,
+    List<ExpenseModel>? expenses,
   }) {
     return RentKhataState(
       properties: properties ?? this.properties,
@@ -47,6 +52,7 @@ class RentKhataState {
       meterReadings: meterReadings ?? this.meterReadings,
       invoices: invoices ?? this.invoices,
       payments: payments ?? this.payments,
+      expenses: expenses ?? this.expenses,
     );
   }
 }
@@ -500,6 +506,58 @@ class RentKhataRepository extends StateNotifier<RentKhataState> {
     }
     final rate = total > 0 ? (occupied / total) * 100 : 0.0;
     return (totalBeds: total, occupiedBeds: occupied, occupancyRate: rate);
+  }
+
+  // ===========================================================================
+  // OPERATIONAL EXPENSES & FINANCIAL LEDGER
+  // ===========================================================================
+  ExpenseModel recordExpense({
+    required String propertyId,
+    required ExpenseCategory category,
+    required String title,
+    required double amount,
+    required DateTime expenseDate,
+    PaymentMode paymentMode = PaymentMode.cash,
+    String? receiptPhotoUrl,
+    String? notes,
+  }) {
+    if (amount <= 0) {
+      throw ArgumentError('Expense amount must be greater than zero, got $amount');
+    }
+
+    final expense = ExpenseModel(
+      id: _uuid.v4(),
+      propertyId: propertyId,
+      category: category,
+      title: title.trim(),
+      amount: amount,
+      expenseDate: expenseDate,
+      paymentMode: paymentMode,
+      receiptPhotoUrl: receiptPhotoUrl,
+      notes: notes?.trim(),
+      createdAt: DateTime.now(),
+    );
+
+    state = state.copyWith(expenses: [...state.expenses, expense]);
+    return expense;
+  }
+
+  void deleteExpense(String expenseId) {
+    state = state.copyWith(
+      expenses: state.expenses.where((e) => e.id != expenseId).toList(),
+    );
+  }
+
+  MonthlyCashFlowSummary getMonthlyCashFlow({
+    required int month,
+    required int year,
+  }) {
+    return ExpenseCalculator.calculateMonthlyCashFlow(
+      payments: state.payments,
+      expenses: state.expenses,
+      month: month,
+      year: year,
+    );
   }
 }
 

@@ -8,6 +8,7 @@ import '../../../core/utils/currency_formatter.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../invoice/models/invoice_model.dart';
 import '../../invoice/presentation/invoice_list_screen.dart';
+import '../../expenses/presentation/expense_tracker_screen.dart';
 import '../../room/models/room_model.dart';
 import '../../room/presentation/add_room_dialog.dart';
 import '../../room/presentation/quick_meter_dialog.dart';
@@ -178,6 +179,16 @@ class DashboardScreen extends ConsumerWidget {
               );
             },
           ),
+          // Expense & P&L Ledger button
+          IconButton(
+            tooltip: 'Expenses & Net Profit (खर्चे और मुनाफा)',
+            icon: const Icon(Icons.account_balance_wallet_outlined, color: AppColors.secondary),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (ctx) => const ExpenseTrackerScreen()),
+              );
+            },
+          ),
           // Language Switcher
           TextButton.icon(
             onPressed: () {
@@ -275,31 +286,52 @@ class DashboardScreen extends ConsumerWidget {
                         ),
                       ],
                     ),
-                    const Divider(height: 16),
-                    InkWell(
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (ctx) => const InvoiceListScreen()),
-                        );
-                      },
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 4),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.receipt_long_rounded, size: 16, color: AppColors.primary),
-                            SizedBox(width: 6),
-                            Text(
-                              'View All Invoices & Bills (सभी बिल देखें) ➔',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primary,
-                              ),
+                    const Divider(height: 14),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        InkWell(
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (ctx) => const InvoiceListScreen()),
+                            );
+                          },
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                            child: Row(
+                              children: [
+                                Icon(Icons.receipt_long_rounded, size: 14, color: AppColors.primary),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Invoices (सभी बिल)',
+                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
-                      ),
+                        Container(width: 1, height: 16, color: AppColors.border),
+                        InkWell(
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (ctx) => const ExpenseTrackerScreen()),
+                            );
+                          },
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                            child: Row(
+                              children: [
+                                Icon(Icons.account_balance_wallet_outlined, size: 14, color: AppColors.secondary),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Expenses & P&L (खर्चे)',
+                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.secondary),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
