@@ -338,7 +338,8 @@ void main() {
       expect(find.text('Base Rent (कमरा किराया)'), findsOneWidget);
       expect(find.text('Electricity / Sub-Meter (बिजली बिल)'), findsOneWidget);
       expect(find.text('Maintenance Charges (रखरखाव)'), findsOneWidget);
-      expect(find.text('Record Payment (रुपये जमा करें)'), findsOneWidget);
+      expect(find.textContaining('Show UPI QR / Pay Online'), findsOneWidget);
+      expect(find.text('Record Cash / Offline Payment (रुपये जमा करें)'), findsOneWidget);
       expect(find.text('Copy WhatsApp Rent Bill Text'), findsOneWidget);
     });
   });

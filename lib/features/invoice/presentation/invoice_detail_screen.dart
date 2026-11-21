@@ -9,6 +9,7 @@ import '../../../core/utils/currency_formatter.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/status_badge.dart';
 import '../../room/presentation/quick_payment_dialog.dart';
+import '../../payment/presentation/payment_sheet.dart';
 import '../models/invoice_model.dart';
 
 /// Screen displaying the full itemized breakdown of a monthly rent bill
@@ -351,8 +352,36 @@ class InvoiceDetailScreen extends ConsumerWidget {
 
             // Action Buttons
             if (invoice.balanceDue > 0) ...[
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                icon: const Icon(Icons.qr_code_scanner_rounded),
+                label: Text(
+                  '⚡ Show UPI QR / Pay Online (${CurrencyFormatter.format(invoice.balanceDue)})',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                    ),
+                    builder: (ctx) => PaymentSheet(
+                      invoice: invoice,
+                      roomNumber: room.roomNumber,
+                      tenantName: tenant.fullName,
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 10),
               AppButton(
-                label: 'Record Payment (रुपये जमा करें)',
+                label: 'Record Cash / Offline Payment (रुपये जमा करें)',
                 icon: Icons.payments_outlined,
                 onPressed: () {
                   showDialog(

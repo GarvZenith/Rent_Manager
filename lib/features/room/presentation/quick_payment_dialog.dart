@@ -6,6 +6,7 @@ import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../invoice/models/invoice_model.dart';
 import '../../payment/models/payment_model.dart';
+import '../../payment/presentation/payment_sheet.dart';
 
 /// Modal dialog to record rent payments and settle invoices
 class QuickPaymentDialog extends ConsumerStatefulWidget {
@@ -110,13 +111,44 @@ class _QuickPaymentDialogState extends ConsumerState<QuickPaymentDialog> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Pending Balance (बाकी राशि):', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                  const Expanded(
+                    child: Text('Pending Balance (बाकी राशि):', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                  ),
                   Text(
                     CurrencyFormatter.format(widget.invoice.balanceDue),
                     style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: AppColors.statusOverdue),
                   ),
                 ],
               ),
+            ),
+            const SizedBox(height: 10),
+
+            // Show QR Code Button
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(38),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                side: const BorderSide(color: AppColors.primary),
+              ),
+              icon: const Icon(Icons.qr_code_2_rounded, size: 18, color: AppColors.primary),
+              label: const Text(
+                'Show UPI QR Code to Tenant',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppColors.primary),
+              ),
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                  ),
+                  builder: (ctx) => PaymentSheet(
+                    invoice: widget.invoice,
+                    roomNumber: widget.roomNumber,
+                    tenantName: 'Tenant',
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 14),
 
