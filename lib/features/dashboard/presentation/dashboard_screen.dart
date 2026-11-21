@@ -12,6 +12,8 @@ import '../../room/presentation/add_room_dialog.dart';
 import '../../room/presentation/quick_meter_dialog.dart';
 import '../../room/presentation/quick_payment_dialog.dart';
 import '../../room/presentation/widgets/room_card.dart';
+import '../../tenant/presentation/add_tenant_dialog.dart';
+import '../../tenant/presentation/tenant_profile_dialog.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -87,7 +89,6 @@ class DashboardScreen extends ConsumerWidget {
       year: DateTime.now().year,
       electricityCharges: 450.0,
     );
-    // Mark as overdue for demo
     repo.updateInvoiceStatus(inv102.id, InvoiceStatus.overdue);
 
     // 4. Room 103: Double Sharing - Due Today / Partial Payment
@@ -308,32 +309,54 @@ class DashboardScreen extends ConsumerWidget {
               const SizedBox(height: 16),
             ],
 
-            // Section Header: Rooms List & Action
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            // Section Header: Rooms List & Actions (Add Room + Onboard Tenant)
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 8,
               children: [
                 Text(
                   '${ref.tr("rooms")} (${rooms.length})',
                   style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
                 ),
-                TextButton.icon(
-                  onPressed: () {
-                    final propId = property?.id ??
-                        repoNotifier.addProperty(
-                          name: 'My Hostel',
-                          address: 'Main Road',
-                          city: 'Kota',
-                          stateName: 'Rajasthan',
-                          pincode: '324005',
-                        ).id;
+                Wrap(
+                  spacing: 6,
+                  children: [
+                    TextButton.icon(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (ctx) => const AddTenantDialog(),
+                        );
+                      },
+                      icon: const Icon(Icons.person_add_alt_rounded, size: 17, color: AppColors.primary),
+                      label: const Text('Add Tenant', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        final propId = property?.id ??
+                            repoNotifier.addProperty(
+                              name: 'My Hostel',
+                              address: 'Main Road',
+                              city: 'Kota',
+                              stateName: 'Rajasthan',
+                              pincode: '324005',
+                            ).id;
 
-                    showDialog(
-                      context: context,
-                      builder: (ctx) => AddRoomDialog(propertyId: propId),
-                    );
-                  },
-                  icon: const Icon(Icons.add_circle_outline_rounded, size: 18),
-                  label: const Text('Add Room', style: TextStyle(fontWeight: FontWeight.bold)),
+                        showDialog(
+                          context: context,
+                          builder: (ctx) => AddRoomDialog(propertyId: propId),
+                        );
+                      },
+                      icon: const Icon(Icons.add, size: 16),
+                      label: const Text('Add Room', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                        minimumSize: const Size(0, 36),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -374,6 +397,33 @@ class DashboardScreen extends ConsumerWidget {
                   return RoomCard(
                     room: room,
                     latestInvoice: invoice,
+                    onBedTap: (bed) {
+                      if (bed.isOccupied) {
+                        // Find tenant and lease
+                        final tenant = state.tenants.where((t) => t.id == bed.currentTenantId).firstOrNull;
+                        final lease = state.leases.where((l) => l.bedId == bed.id && l.isActive).firstOrNull;
+                        if (tenant != null && lease != null) {
+                          showDialog(
+                            context: context,
+                            builder: (dCtx) => TenantProfileDialog(
+                              tenant: tenant,
+                              lease: lease,
+                              roomNumber: room.roomNumber,
+                              bedLabel: bed.bedLabel,
+                            ),
+                          );
+                        }
+                      } else {
+                        // Open onboarding dialog pre-filled with this room and bed
+                        showDialog(
+                          context: context,
+                          builder: (dCtx) => AddTenantDialog(
+                            preselectedRoomId: room.id,
+                            preselectedBedId: bed.id,
+                          ),
+                        );
+                      }
+                    },
                     onAddReading: () {
                       showDialog(
                         context: context,

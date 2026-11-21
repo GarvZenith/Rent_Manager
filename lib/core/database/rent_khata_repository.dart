@@ -201,6 +201,56 @@ class RentKhataRepository extends StateNotifier<RentKhataState> {
   }
 
   // ===========================================================================
+  // TENANT MOVE-OUT & SECURITY DEPOSIT SETTLEMENT
+  // ===========================================================================
+  void settleMoveOut({required String leaseId, String? notes}) {
+    final lease = state.leases.firstWhere(
+      (l) => l.id == leaseId,
+      orElse: () => throw ArgumentError('Lease not found: $leaseId'),
+    );
+
+    // Free up the bed in the room
+    final updatedRooms = state.rooms.map((room) {
+      if (room.id == lease.roomId) {
+        final updatedBeds = room.beds.map((b) {
+          if (b.id == lease.bedId) {
+            return b.copyWith(isOccupied: false, currentTenantId: null);
+          }
+          return b;
+        }).toList();
+        return room.copyWith(beds: updatedBeds);
+      }
+      return room;
+    }).toList();
+
+    // Deactivate the lease
+    final updatedLeases = state.leases.map((l) {
+      if (l.id == leaseId) {
+        return l.copyWith(
+          isActive: false,
+          endDate: DateTime.now(),
+          moveOutNotes: notes,
+        );
+      }
+      return l;
+    }).toList();
+
+    // Mark tenant as inactive
+    final updatedTenants = state.tenants.map((t) {
+      if (t.id == lease.tenantId) {
+        return t.copyWith(status: TenantStatus.inactive);
+      }
+      return t;
+    }).toList();
+
+    state = state.copyWith(
+      rooms: updatedRooms,
+      leases: updatedLeases,
+      tenants: updatedTenants,
+    );
+  }
+
+  // ===========================================================================
   // SUB-METER ELECTRICITY ENGINE
   // ===========================================================================
   MeterReadingModel recordMeterReading({

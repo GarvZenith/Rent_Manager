@@ -4,6 +4,7 @@ import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/status_badge.dart';
 import '../../../invoice/models/invoice_model.dart';
 import '../../models/room_model.dart';
+import '../../models/bed_model.dart';
 
 /// Interactive room card displaying occupancy, meter units, and financial status
 class RoomCard extends StatelessWidget {
@@ -12,6 +13,7 @@ class RoomCard extends StatelessWidget {
   final VoidCallback? onAddReading;
   final VoidCallback? onRecordPayment;
   final VoidCallback? onSendReminder;
+  final void Function(BedModel bed)? onBedTap;
 
   const RoomCard({
     super.key,
@@ -20,6 +22,7 @@ class RoomCard extends StatelessWidget {
     this.onAddReading,
     this.onRecordPayment,
     this.onSendReminder,
+    this.onBedTap,
   });
 
   RoomPaymentStatus get _status {
@@ -157,39 +160,43 @@ class RoomCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // Beds Occupancy Indicators
+            // Beds Occupancy Indicators (Clickable to view Tenant Profile or Onboard)
             Wrap(
               spacing: 6,
               runSpacing: 4,
               children: room.beds.map((bed) {
                 final isOcc = bed.isOccupied;
-                return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: isOcc ? AppColors.statusPaidLight : AppColors.statusVacantLight,
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(
-                      color: isOcc ? AppColors.statusPaid.withValues(alpha: 0.3) : AppColors.border,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        isOcc ? Icons.person_rounded : Icons.person_outline_rounded,
-                        size: 13,
-                        color: isOcc ? AppColors.statusPaid : AppColors.textMuted,
+                return InkWell(
+                  onTap: () => onBedTap?.call(bed),
+                  borderRadius: BorderRadius.circular(6),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: isOcc ? AppColors.statusPaidLight : AppColors.statusVacantLight,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: isOcc ? AppColors.statusPaid.withValues(alpha: 0.3) : AppColors.border,
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${bed.bedLabel}: ${isOcc ? "Occupied" : "Empty"}',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isOcc ? Icons.person_rounded : Icons.person_add_alt_1_rounded,
+                          size: 13,
                           color: isOcc ? AppColors.statusPaid : AppColors.textMuted,
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 4),
+                        Text(
+                          '${bed.bedLabel}: ${isOcc ? "Tenant Active" : "+ Add Tenant"}',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: isOcc ? AppColors.statusPaid : AppColors.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               }).toList(),
