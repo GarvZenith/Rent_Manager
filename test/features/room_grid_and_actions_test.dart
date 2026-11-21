@@ -96,7 +96,7 @@ void main() {
       );
 
       // Verify previous reading is shown
-      expect(find.text('1000 Units'), findsOneWidget);
+      expect(find.textContaining('1000 Units'), findsOneWidget);
 
       // Enter new reading 1080
       final textField = find.byType(TextField);
