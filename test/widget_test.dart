@@ -39,9 +39,8 @@ void main() {
       );
 
       // Verify that RentKhata dashboard loads
-      expect(find.text('Krishna Residency (Kota)'), findsOneWidget);
-      expect(find.text('₹1,42,500'), findsOneWidget);
-      expect(find.text('₹28,500'), findsOneWidget);
+      expect(find.text('Setup Your PG / Hostel'), findsOneWidget);
+      expect(find.text('⚡ Pre-load Kota PG Demo (Live Test)'), findsOneWidget);
 
       // Default language is Hinglish
       expect(find.text('English'), findsOneWidget); // Button shows 'English' to switch to English

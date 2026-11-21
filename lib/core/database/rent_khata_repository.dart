@@ -343,6 +343,16 @@ class RentKhataRepository extends StateNotifier<RentKhataState> {
     return payment;
   }
 
+  void updateInvoiceStatus(String invoiceId, InvoiceStatus newStatus) {
+    final updatedInvoices = state.invoices.map((inv) {
+      if (inv.id == invoiceId) {
+        return inv.copyWith(status: newStatus);
+      }
+      return inv;
+    }).toList();
+    state = state.copyWith(invoices: updatedInvoices);
+  }
+
   // ===========================================================================
   // DASHBOARD KPI AGGREGATION METRICS
   // ===========================================================================
