@@ -10,6 +10,7 @@ import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/status_badge.dart';
 import '../../room/presentation/quick_payment_dialog.dart';
 import '../../payment/presentation/payment_sheet.dart';
+import '../../receipt/services/pdf_sharing_service.dart';
 import '../../whatsapp/presentation/send_reminder_sheet.dart';
 import '../models/invoice_model.dart';
 
@@ -313,38 +314,81 @@ class InvoiceDetailScreen extends ConsumerWidget {
               const SizedBox(height: 8),
               ...payments.map((p) => Card(
                     margin: const EdgeInsets.only(bottom: 8),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    const Icon(Icons.receipt_long_rounded, size: 16, color: AppColors.statusPaid),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      p.receiptNumber,
-                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  '${dateFormat.format(p.paymentDate)} • ${p.paymentMode.name.toUpperCase()} ${p.transactionRef != null ? "(${p.transactionRef})" : ""}',
-                                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                                ),
-                              ],
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(10),
+                      onTap: () {
+                        final property = state.properties.isNotEmpty ? state.properties.first : null;
+                        if (property != null) {
+                          final meterReading = state.meterReadings.isNotEmpty
+                              ? state.meterReadings.lastWhere(
+                                  (mr) => mr.roomId == room.id,
+                                  orElse: () => state.meterReadings.last,
+                                )
+                              : null;
+
+                          PdfSharingService.openReceiptPreview(
+                            context,
+                            property: property,
+                            room: room,
+                            tenant: tenant,
+                            invoice: invoice,
+                            payment: p,
+                            meterReading: meterReading,
+                          );
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.receipt_long_rounded, size: 16, color: AppColors.statusPaid),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        p.receiptNumber,
+                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primaryLight,
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
+                                        child: const Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(Icons.picture_as_pdf_rounded, size: 10, color: AppColors.primary),
+                                            SizedBox(width: 2),
+                                            Text(
+                                              'View PDF',
+                                              style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primary),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '${dateFormat.format(p.paymentDate)} • ${p.paymentMode.name.toUpperCase()} ${p.transactionRef != null ? "(${p.transactionRef})" : ""}',
+                                    style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          Text(
-                            CurrencyFormatter.format(p.amount),
-                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: AppColors.statusPaid),
-                          ),
-                        ],
+                            Text(
+                              CurrencyFormatter.format(p.amount),
+                              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: AppColors.statusPaid),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   )),
