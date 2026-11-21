@@ -428,6 +428,7 @@ class RentKhataRepository extends StateNotifier<RentKhataState> {
     PaymentMode mode = PaymentMode.upi,
     String? transactionRef,
     String? notes,
+    DateTime? paymentDate,
   }) {
     final invoice = state.invoices.firstWhere((i) => i.id == invoiceId);
     final receiptNumber = 'REC-${DateTime.now().year}-${(state.payments.length + 1).toString().padLeft(4, '0')}';
@@ -436,7 +437,7 @@ class RentKhataRepository extends StateNotifier<RentKhataState> {
       id: _uuid.v4(),
       invoiceId: invoiceId,
       amount: amount,
-      paymentDate: DateTime.now(),
+      paymentDate: paymentDate ?? DateTime.now(),
       paymentMode: mode,
       transactionRef: transactionRef,
       receiptNumber: receiptNumber,
