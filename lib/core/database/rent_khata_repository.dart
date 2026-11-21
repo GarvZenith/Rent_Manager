@@ -8,6 +8,7 @@ import '../../features/tenant/models/lease_model.dart';
 import '../../features/meter/models/meter_reading_model.dart';
 import '../../features/invoice/models/invoice_model.dart';
 import '../../features/payment/models/payment_model.dart';
+import '../../features/invoice/domain/invoice_generator.dart';
 
 /// Immutable state holder for the complete RentKhata offline database
 class RentKhataState {
@@ -344,6 +345,72 @@ class RentKhataRepository extends StateNotifier<RentKhataState> {
 
     state = state.copyWith(invoices: [...state.invoices, invoice]);
     return invoice;
+  }
+
+  /// Generates batch monthly invoices for all active leases across rooms,
+  /// skipping any lease that already has an invoice for this month/year.
+  List<InvoiceModel> generateBatchMonthlyInvoices({
+    required int month,
+    required int year,
+    int dueDayOfMonth = 5,
+    double defaultMaintenance = 0.0,
+    double defaultFoodMess = 0.0,
+    Map<String, double>? roomElectricityCharges,
+  }) {
+    // If roomElectricityCharges not provided, auto-compute from latest meter readings this month
+    final effectiveElectricity = roomElectricityCharges ?? <String, double>{};
+    if (roomElectricityCharges == null) {
+      for (final r in state.rooms) {
+        final roomReadings = state.meterReadings.where((mr) =>
+            mr.roomId == r.id &&
+            mr.readingDate.month == month &&
+            mr.readingDate.year == year).toList();
+        if (roomReadings.isNotEmpty) {
+          final totalUnitsCost = roomReadings.fold<double>(
+              0.0, (sum, mr) => sum + mr.totalAmount);
+          effectiveElectricity[r.id] = totalUnitsCost;
+        }
+      }
+    }
+
+    final newInvoices = InvoiceGenerator.generateBatchInvoices(
+      activeLeases: state.leases.where((l) => l.isActive).toList(),
+      rooms: state.rooms,
+      existingInvoices: state.invoices,
+      billingMonth: month,
+      billingYear: year,
+      roomElectricityCharges: effectiveElectricity,
+      defaultMaintenance: defaultMaintenance,
+      defaultFoodMess: defaultFoodMess,
+      dueDayOfMonth: dueDayOfMonth,
+    );
+
+    if (newInvoices.isNotEmpty) {
+      state = state.copyWith(invoices: [...state.invoices, ...newInvoices]);
+    }
+
+    return newInvoices;
+  }
+
+  /// Returns all invoices for a specific tenant
+  List<InvoiceModel> getInvoicesForTenant(String tenantId) {
+    return state.invoices.where((i) => i.tenantId == tenantId).toList();
+  }
+
+  /// Returns all invoices for a specific room
+  List<InvoiceModel> getInvoicesForRoom(String roomId) {
+    return state.invoices.where((i) => i.roomId == roomId).toList();
+  }
+
+  /// Cancel or delete an invoice
+  void cancelInvoice(String invoiceId) {
+    final updated = state.invoices.map((inv) {
+      if (inv.id == invoiceId) {
+        return inv.copyWith(status: InvoiceStatus.cancelled);
+      }
+      return inv;
+    }).toList();
+    state = state.copyWith(invoices: updated);
   }
 
   // ===========================================================================

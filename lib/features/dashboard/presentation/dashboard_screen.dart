@@ -7,6 +7,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../invoice/models/invoice_model.dart';
+import '../../invoice/presentation/invoice_list_screen.dart';
 import '../../room/models/room_model.dart';
 import '../../room/presentation/add_room_dialog.dart';
 import '../../room/presentation/quick_meter_dialog.dart';
@@ -167,6 +168,16 @@ class DashboardScreen extends ConsumerWidget {
           ],
         ),
         actions: [
+          // All Invoices button
+          IconButton(
+            tooltip: 'All Invoices (सभी बिल)',
+            icon: const Icon(Icons.receipt_long_rounded, color: AppColors.primary),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (ctx) => const InvoiceListScreen()),
+              );
+            },
+          ),
           // Language Switcher
           TextButton.icon(
             onPressed: () {
@@ -263,6 +274,32 @@ class DashboardScreen extends ConsumerWidget {
                           style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.primary),
                         ),
                       ],
+                    ),
+                    const Divider(height: 16),
+                    InkWell(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (ctx) => const InvoiceListScreen()),
+                        );
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.receipt_long_rounded, size: 16, color: AppColors.primary),
+                            SizedBox(width: 6),
+                            Text(
+                              'View All Invoices & Bills (सभी बिल देखें) ➔',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ],
                 ),
