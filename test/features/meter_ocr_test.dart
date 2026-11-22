@@ -143,9 +143,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Verify AI banner and scan button
+      // Verify AI banner and scan buttons
       expect(find.text('AI Smart Meter Scan'), findsOneWidget);
-      expect(find.text('Scan'), findsOneWidget);
+      expect(find.text('Camera Scan'), findsOneWidget);
+      expect(find.text('Upload Photo'), findsOneWidget);
     });
 
     testWidgets('Tapping AI Scan updates reading, attaches photo proof and recalculates bill', (tester) async {
@@ -190,17 +191,10 @@ void main() {
       expect(find.text('1000'), findsOneWidget); // in TextField
       expect(find.text('Last Dial: 1000 Units'), findsOneWidget);
 
-      // Tap Scan button in AI banner
-      final scanButton = find.widgetWithText(ElevatedButton, 'Scan');
+      // Tap Camera Scan directly in AI banner
+      final scanButton = find.widgetWithText(OutlinedButton, 'Camera Scan');
       expect(scanButton, findsOneWidget);
       await tester.tap(scanButton);
-      await tester.pumpAndSettle();
-
-      // BottomSheet pops up with Camera and Gallery options
-      expect(find.text('Take Photo with Camera'), findsOneWidget);
-
-      // Select Camera option
-      await tester.tap(find.text('Take Photo with Camera'));
       await tester.pumpAndSettle();
 
       // Verify reading updated to 1080

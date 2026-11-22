@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -118,66 +119,35 @@ class _QuickMeterDialogState extends ConsumerState<QuickMeterDialog> {
     }
   }
 
-  void _showImageSourceSelector() {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'AI Sub-Meter Scanner (स्मार्ट मीटर स्कैनर)',
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                'Point camera at the meter LCD to read digits automatically without typing.',
-                style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: 16),
-              ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryLight,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(Icons.camera_alt_rounded, color: AppColors.primary),
-                ),
-                title: const Text('Take Photo with Camera', style: TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: const Text('Point at LCD display on the sub-meter'),
-                onTap: () {
-                  Navigator.of(ctx).pop();
-                  _handleOcrScan(ImageSource.camera);
-                },
-              ),
-              ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: AppColors.secondary.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(Icons.photo_library_rounded, color: AppColors.secondary),
-                ),
-                title: const Text('Choose from Gallery', style: TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: const Text('Select an existing photo of the meter dial'),
-                onTap: () {
-                  Navigator.of(ctx).pop();
-                  _handleOcrScan(ImageSource.gallery);
-                },
-              ),
-            ],
-          ),
+  void _runWebDemoSimulation() {
+    setState(() {
+      _isScanning = true;
+      _ocrDetectionMessage = null;
+    });
+
+    Future.delayed(const Duration(milliseconds: 400), () {
+      if (!mounted) return;
+      final simulatedReading = _previousReading + 80.0;
+      final formatted = simulatedReading.toStringAsFixed(0);
+
+      _readingController.text = formatted;
+      _onReadingChanged(formatted);
+
+      setState(() {
+        _isScanning = false;
+        _scannedPhotoPath = 'web_simulated_meter_audit.jpg';
+        _photoProofAttached = true;
+        _ocrDetectionMessage = '✅ AI Auto-Read: $formatted Units (+80 Units consumed)';
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('✅ Scanned $formatted Units (Demo)!'),
+          backgroundColor: AppColors.statusPaid,
+          duration: const Duration(seconds: 2),
         ),
-      ),
-    );
+      );
+    });
   }
 
   void _save() {
@@ -255,63 +225,104 @@ class _QuickMeterDialogState extends ConsumerState<QuickMeterDialog> {
               ),
               const Divider(height: 20),
 
-              // AI Smart Camera Scanner Banner / Action
+              // AI Smart Camera Scanner Banner / Action (Direct in-dialog buttons - no off-screen bottom sheets)
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      AppColors.primary.withValues(alpha: 0.10),
-                      AppColors.secondary.withValues(alpha: 0.10),
+                      AppColors.primary.withValues(alpha: 0.12),
+                      AppColors.secondary.withValues(alpha: 0.12),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
+                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
                 ),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(Icons.document_scanner_rounded, color: Colors.white, size: 20),
-                    ),
-                    const SizedBox(width: 12),
-                    const Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'AI Smart Meter Scan',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          Text(
-                            'Photo khicho aur bill automatic calculate ho jayega',
-                            style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                          child: const Icon(Icons.document_scanner_rounded, color: Colors.white, size: 20),
+                        ),
+                        const SizedBox(width: 10),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'AI Smart Meter Scan',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary),
+                              ),
+                              Text(
+                                'Photo khicho aur bill automatic calculate hoga',
+                                style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    ElevatedButton.icon(
-                      onPressed: _isScanning ? null : _showImageSourceSelector,
-                      icon: _isScanning
-                          ? const SizedBox(
+                    const SizedBox(height: 10),
+                    if (_isScanning)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 6),
+                        child: Row(
+                          children: [
+                            SizedBox(
                               width: 14,
                               height: 14,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                            )
-                          : const Icon(Icons.camera_alt_rounded, size: 16),
-                      label: Text(_isScanning ? 'Scanning...' : 'Scan'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                            ),
+                            SizedBox(width: 10),
+                            Text('Scanning meter LCD digits...', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                      )
+                    else
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          OutlinedButton.icon(
+                            onPressed: () => _handleOcrScan(ImageSource.camera),
+                            icon: const Icon(Icons.camera_alt_rounded, size: 16),
+                            label: const Text('Camera Scan', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.primary,
+                              side: const BorderSide(color: AppColors.primary),
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            ),
+                          ),
+                          OutlinedButton.icon(
+                            onPressed: () => _handleOcrScan(ImageSource.gallery),
+                            icon: const Icon(Icons.photo_library_rounded, size: 16),
+                            label: const Text('Upload Photo', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.secondary,
+                              side: const BorderSide(color: AppColors.secondary),
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            ),
+                          ),
+                          if (kIsWeb)
+                            ElevatedButton.icon(
+                              onPressed: _runWebDemoSimulation,
+                              icon: const Icon(Icons.auto_awesome_rounded, size: 14),
+                              label: const Text('Demo Auto-Read', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              ),
+                            ),
+                        ],
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -384,9 +395,9 @@ class _QuickMeterDialogState extends ConsumerState<QuickMeterDialog> {
                   prefixIcon: const Icon(Icons.flash_on_rounded, color: AppColors.primary),
                   errorText: _errorMessage,
                   suffixIcon: IconButton(
-                    tooltip: 'AI Scan Photo',
+                    tooltip: 'Camera Scan',
                     icon: const Icon(Icons.qr_code_scanner_rounded, color: AppColors.primary),
-                    onPressed: _showImageSourceSelector,
+                    onPressed: () => _handleOcrScan(ImageSource.camera),
                   ),
                 ),
                 onChanged: _onReadingChanged,
