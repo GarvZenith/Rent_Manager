@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/database/rent_khata_repository.dart';
@@ -16,6 +17,7 @@ import '../../room/presentation/quick_payment_dialog.dart';
 import '../../room/presentation/widgets/room_card.dart';
 import '../../tenant/presentation/add_tenant_dialog.dart';
 import '../../tenant/presentation/tenant_profile_dialog.dart';
+import '../../property/presentation/property_setup_dialog.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -158,12 +160,32 @@ class DashboardScreen extends ConsumerWidget {
               ref.tr('appName'),
               style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
             ),
-            Text(
-              property != null ? '${property.name} (${property.city})' : 'Setup Your PG / Hostel',
-              style: const TextStyle(
-                fontSize: 12,
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.normal,
+            InkWell(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (ctx) => PropertySetupDialog(existingProperty: property),
+                );
+              },
+              borderRadius: BorderRadius.circular(4),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    property != null ? '${property.name} (${property.city})' : 'Setup Your PG / Hostel',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    property != null ? Icons.edit_outlined : Icons.add_circle_outline,
+                    size: 13,
+                    color: AppColors.primary,
+                  ),
+                ],
               ),
             ),
           ],
@@ -339,43 +361,98 @@ class DashboardScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
 
-            // Demo Shortcut Button (If database is empty)
+            // Empty State (Fresh clean onboarding for Release APK vs Sample Demo for Debug)
             if (rooms.isEmpty) ...[
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryLight.withValues(alpha: 0.6),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.4)),
+              if (kDebugMode) ...[
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryLight.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.4)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(Icons.auto_awesome_rounded, color: AppColors.primary),
+                          SizedBox(width: 8),
+                          Text(
+                            'Quick Test: Pre-load Sample PG Data',
+                            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'Ek click mein 4 rooms (1 Paid, 1 Overdue, 1 Due, 1 Vacant) add karein taaki aap live test kar sakein!',
+                        style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                      ),
+                      const SizedBox(height: 12),
+                      AppButton(
+                        label: '⚡ Pre-load Kota PG Demo (Live Test)',
+                        icon: Icons.play_arrow_rounded,
+                        onPressed: () => _loadSamplePGData(ref),
+                      ),
+                    ],
+                  ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Row(
-                      children: [
-                        Icon(Icons.auto_awesome_rounded, color: AppColors.primary),
-                        SizedBox(width: 8),
-                        Text(
-                          'Quick Test: Pre-load Sample PG Data',
-                          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                const SizedBox(height: 16),
+              ] else ...[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: const BoxDecoration(
+                          color: AppColors.primaryLight,
+                          shape: BoxShape.circle,
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    const Text(
-                      'Ek click mein 4 rooms (1 Paid, 1 Overdue, 1 Due, 1 Vacant) add karein taaki aap live test kar sakein!',
-                      style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                    ),
-                    const SizedBox(height: 12),
-                    AppButton(
-                      label: '⚡ Pre-load Kota PG Demo (Live Test)',
-                      icon: Icons.play_arrow_rounded,
-                      onPressed: () => _loadSamplePGData(ref),
-                    ),
-                  ],
+                        child: const Icon(Icons.apartment_rounded, color: AppColors.primary, size: 36),
+                      ),
+                      const SizedBox(height: 14),
+                      const Text(
+                        'RentKhata mein aapka swaagat hai! 🏠',
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'Apne PG / Hostel ka pehla Room add karein aur kirayedaar ki digital entry shuru karein.',
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 18),
+                      AppButton(
+                        label: property == null ? '🏠 Pehla PG / Property Setup Karein' : '+ Pehla Room Add Karein',
+                        icon: property == null ? Icons.apartment_rounded : Icons.add_home_rounded,
+                        onPressed: () {
+                          if (property == null) {
+                            showDialog(
+                              context: context,
+                              builder: (ctx) => const PropertySetupDialog(),
+                            );
+                          } else {
+                            showDialog(
+                              context: context,
+                              builder: (ctx) => AddRoomDialog(propertyId: property.id),
+                            );
+                          }
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
+              ],
             ],
 
             // Section Header: Rooms List & Actions (Add Room + Onboard Tenant)
@@ -394,6 +471,15 @@ class DashboardScreen extends ConsumerWidget {
                   children: [
                     TextButton.icon(
                       onPressed: () {
+                        if (rooms.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Pehle ek room add karein, fir kirayedaar onboard karein.'),
+                              backgroundColor: AppColors.primary,
+                            ),
+                          );
+                          return;
+                        }
                         showDialog(
                           context: context,
                           builder: (ctx) => const AddTenantDialog(),
@@ -404,19 +490,17 @@ class DashboardScreen extends ConsumerWidget {
                     ),
                     ElevatedButton.icon(
                       onPressed: () {
-                        final propId = property?.id ??
-                            repoNotifier.addProperty(
-                              name: 'My Hostel',
-                              address: 'Main Road',
-                              city: 'Kota',
-                              stateName: 'Rajasthan',
-                              pincode: '324005',
-                            ).id;
-
-                        showDialog(
-                          context: context,
-                          builder: (ctx) => AddRoomDialog(propertyId: propId),
-                        );
+                        if (property == null) {
+                          showDialog(
+                            context: context,
+                            builder: (ctx) => const PropertySetupDialog(),
+                          );
+                        } else {
+                          showDialog(
+                            context: context,
+                            builder: (ctx) => AddRoomDialog(propertyId: property.id),
+                          );
+                        }
                       },
                       icon: const Icon(Icons.add, size: 16),
                       label: const Text('Add Room', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),

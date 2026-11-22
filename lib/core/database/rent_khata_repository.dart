@@ -96,6 +96,40 @@ class RentKhataRepository extends StateNotifier<RentKhataState> {
     return property;
   }
 
+  PropertyModel updateProperty({
+    required String propertyId,
+    required String name,
+    required String address,
+    required String city,
+    required String stateName,
+    required String pincode,
+    double defaultElectricityRate = 10.0,
+    int defaultRentDueDay = 1,
+    String? upiVpa,
+    String? upiAccountName,
+  }) {
+    final updatedList = state.properties.map((p) {
+      if (p.id == propertyId) {
+        return PropertyModel(
+          id: p.id,
+          name: name,
+          address: address,
+          city: city,
+          state: stateName,
+          pincode: pincode,
+          defaultElectricityRate: defaultElectricityRate,
+          defaultRentDueDay: defaultRentDueDay,
+          upiVpa: upiVpa,
+          upiAccountName: upiAccountName,
+          createdAt: p.createdAt,
+        );
+      }
+      return p;
+    }).toList();
+    state = state.copyWith(properties: updatedList);
+    return updatedList.firstWhere((p) => p.id == propertyId);
+  }
+
   // ===========================================================================
   // ROOM & BED OPERATIONS
   // ===========================================================================
