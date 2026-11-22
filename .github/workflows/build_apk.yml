@@ -20,6 +20,10 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Set up Android SDK & Licenses
+        run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -33,7 +37,7 @@ jobs:
         run: flutter test
 
       - name: Build Release APK
-        run: flutter build apk --release
+        run: flutter build apk --release --no-tree-shake-icons
 
       - name: Upload RentKhata APK Artifact
         uses: actions/upload-artifact@v4

@@ -7,7 +7,6 @@ plugins {
 android {
     namespace = "com.rentkhata.rent_manager"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
