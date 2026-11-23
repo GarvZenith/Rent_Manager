@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/database/rent_khata_repository.dart';
+import '../../../../core/localization/app_strings.dart';
+import '../../../../core/localization/locale_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/app_button.dart';
@@ -189,6 +191,8 @@ class _QuickMeterDialogState extends ConsumerState<QuickMeterDialog> {
       );
     }
 
+    final isEng = ref.watch(languageProvider) == AppLanguage.english;
+
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: ConstrainedBox(
@@ -210,9 +214,9 @@ class _QuickMeterDialogState extends ConsumerState<QuickMeterDialog> {
                           'Room ${widget.room.roomNumber} - Meter Reading',
                           style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
                         ),
-                        const Text(
-                          'बिजली मीटर रीडिंग दर्ज करें (Dispute-Proof)',
-                          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                        Text(
+                          isEng ? 'Record Sub-meter Reading (Dispute-Proof)' : 'बिजली मीटर रीडिंग दर्ज करें (Dispute-Proof)',
+                          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                         ),
                       ],
                     ),
@@ -252,17 +256,19 @@ class _QuickMeterDialogState extends ConsumerState<QuickMeterDialog> {
                           child: const Icon(Icons.document_scanner_rounded, color: Colors.white, size: 20),
                         ),
                         const SizedBox(width: 10),
-                        const Expanded(
+                        Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              const Text(
                                 'AI Smart Meter Scan',
                                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary),
                               ),
                               Text(
-                                'Photo khicho aur bill automatic calculate hoga',
-                                style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                                isEng
+                                    ? 'Capture photo or upload to automatically extract reading'
+                                    : 'Photo khicho aur bill automatic calculate hoga',
+                                style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
                               ),
                             ],
                           ),
@@ -391,7 +397,7 @@ class _QuickMeterDialogState extends ConsumerState<QuickMeterDialog> {
                 autofocus: true,
                 style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 decoration: InputDecoration(
-                  labelText: 'Enter Current Reading (नयी रीडिंग)',
+                  labelText: isEng ? 'Enter Current Reading' : 'Enter Current Reading (नयी रीडिंग)',
                   prefixIcon: const Icon(Icons.flash_on_rounded, color: AppColors.primary),
                   errorText: _errorMessage,
                   suffixIcon: IconButton(

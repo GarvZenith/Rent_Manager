@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/database/rent_khata_repository.dart';
+import '../../../../core/localization/app_strings.dart';
+import '../../../../core/localization/locale_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../room/models/room_model.dart';
@@ -133,6 +135,7 @@ class _AddTenantDialogState extends ConsumerState<AddTenantDialog> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(rentKhataRepositoryProvider);
+    final isEng = ref.watch(languageProvider) == AppLanguage.english;
     final vacantRooms = state.rooms.where((r) => r.hasVacantBed).toList();
 
     RoomModel? currentRoom;
@@ -159,17 +162,17 @@ class _AddTenantDialogState extends ConsumerState<AddTenantDialog> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Onboard Tenant (नया किरायेदार)',
-                            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
+                            isEng ? 'Onboard Tenant' : 'Onboard Tenant (नया किरायेदार)',
+                            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
                           ),
                           Text(
-                            'Add tenant details, room bed & KYC',
-                            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                            isEng ? 'Add tenant details, room bed & KYC' : 'Add tenant details, room bed & KYC',
+                            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                           ),
                         ],
                       ),
@@ -183,18 +186,18 @@ class _AddTenantDialogState extends ConsumerState<AddTenantDialog> {
                 const Divider(height: 20),
 
                 // Section 1: Tenant Identity
-                const Text(
-                  '1. Personal Details (व्यक्तिगत जानकारी)',
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: AppColors.primary),
+                Text(
+                  isEng ? '1. Personal Details' : '1. Personal Details (व्यक्तिगत जानकारी)',
+                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: AppColors.primary),
                 ),
                 const SizedBox(height: 10),
 
                 TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Tenant Full Name (पूरा नाम)',
+                  decoration: InputDecoration(
+                    labelText: isEng ? 'Tenant Full Name' : 'Tenant Full Name (पूरा नाम)',
                     hintText: 'e.g. Rahul Sharma',
-                    prefixIcon: Icon(Icons.person_outline_rounded),
+                    prefixIcon: const Icon(Icons.person_outline_rounded),
                   ),
                   validator: (val) => val == null || val.trim().isEmpty ? 'Name is required' : null,
                 ),
@@ -230,9 +233,9 @@ class _AddTenantDialogState extends ConsumerState<AddTenantDialog> {
                 const SizedBox(height: 16),
 
                 // Section 2: Guardian Info (Kota/Hostel Special)
-                const Text(
-                  '2. Guardian / Parent Details (अभिभावक संपर्क)',
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: AppColors.primary),
+                Text(
+                  isEng ? '2. Guardian / Parent Details' : '2. Guardian / Parent Details (अभिभावक संपर्क)',
+                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: AppColors.primary),
                 ),
                 const SizedBox(height: 10),
 
@@ -263,9 +266,9 @@ class _AddTenantDialogState extends ConsumerState<AddTenantDialog> {
                 const SizedBox(height: 16),
 
                 // Section 3: Room & Bed Allocation
-                const Text(
-                  '3. Room & Bed Allocation (कमरा और बेड)',
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: AppColors.primary),
+                Text(
+                  isEng ? '3. Room & Bed Allocation' : '3. Room & Bed Allocation (कमरा और बेड)',
+                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: AppColors.primary),
                 ),
                 const SizedBox(height: 10),
 
@@ -276,9 +279,11 @@ class _AddTenantDialogState extends ConsumerState<AddTenantDialog> {
                       color: AppColors.statusOverdueLight,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Text(
-                      'No vacant rooms available! Please add a room or free up a bed first.',
-                      style: TextStyle(color: AppColors.statusOverdue, fontWeight: FontWeight.w600, fontSize: 12),
+                    child: Text(
+                      isEng
+                          ? 'No vacant rooms available! Please add a room or free up a bed first.'
+                          : 'No vacant rooms available! Please add a room or free up a bed first.',
+                      style: const TextStyle(color: AppColors.statusOverdue, fontWeight: FontWeight.w600, fontSize: 12),
                     ),
                   )
                 else ...[
@@ -319,9 +324,9 @@ class _AddTenantDialogState extends ConsumerState<AddTenantDialog> {
                 const SizedBox(height: 16),
 
                 // Section 4: Rent & Security Deposit
-                const Text(
-                  '4. Financial Terms (किराया और एडवांस डिपॉजिट)',
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: AppColors.primary),
+                Text(
+                  isEng ? '4. Financial Terms' : '4. Financial Terms (किराया और एडवांस डिपॉजिट)',
+                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: AppColors.primary),
                 ),
                 const SizedBox(height: 10),
 
@@ -359,22 +364,27 @@ class _AddTenantDialogState extends ConsumerState<AddTenantDialog> {
 
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Security Deposit Paid (एडवांस जमा हो गया)', style: TextStyle(fontSize: 13)),
+                  title: Text(
+                    isEng ? 'Security Deposit Paid' : 'Security Deposit Paid (एडवांस जमा हो गया)',
+                    style: const TextStyle(fontSize: 13),
+                  ),
                   value: _isDepositPaid,
                   onChanged: (val) => setState(() => _isDepositPaid = val),
                 ),
                 const SizedBox(height: 16),
 
                 // Section 5: Digital KYC
-                const Text(
-                  '5. Identity Proof / KYC (पहचान पत्र)',
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: AppColors.primary),
+                Text(
+                  isEng ? '5. Identity Proof / KYC' : '5. Identity Proof / KYC (पहचान पत्र)',
+                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: AppColors.primary),
                 ),
                 const SizedBox(height: 10),
 
                 DropdownButtonFormField<String>(
                   initialValue: _idProofType,
-                  decoration: const InputDecoration(labelText: 'ID Proof Type (पहचान पत्र प्रकार)'),
+                  decoration: InputDecoration(
+                    labelText: isEng ? 'ID Proof Type' : 'ID Proof Type (पहचान पत्र प्रकार)',
+                  ),
                   items: const [
                     DropdownMenuItem(value: 'Aadhaar Card', child: Text('Aadhaar Card')),
                     DropdownMenuItem(value: 'College/Student ID', child: Text('College ID')),
@@ -398,7 +408,7 @@ class _AddTenantDialogState extends ConsumerState<AddTenantDialog> {
 
                 // Onboard Submit Button
                 AppButton(
-                  label: 'Complete Onboarding (किरायेदार जोड़ें)',
+                  label: isEng ? 'Complete Onboarding' : 'Complete Onboarding (किरायेदार जोड़ें)',
                   icon: Icons.person_add_rounded,
                   onPressed: vacantRooms.isNotEmpty ? _submit : null,
                 ),

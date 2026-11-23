@@ -328,7 +328,7 @@ void main() {
       expect(find.text('₹8,300'), findsOneWidget);
 
       // Tap on Expense tracker icon in AppBar
-      final expenseIconButton = find.byTooltip('Expenses & Net Profit (खर्चे और मुनाफा)');
+      final expenseIconButton = find.byTooltip('Expenses & Net Profit');
       expect(expenseIconButton, findsOneWidget);
       await tester.tap(expenseIconButton);
       await tester.pumpAndSettle();

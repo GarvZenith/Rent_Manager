@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/database/rent_khata_repository.dart';
+import '../../../../core/localization/app_strings.dart';
+import '../../../../core/localization/locale_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/app_button.dart';
@@ -23,12 +25,15 @@ class TenantProfileDialog extends ConsumerWidget {
   });
 
   void _moveOut(BuildContext context, WidgetRef ref) {
+    final isEng = ref.read(languageProvider) == AppLanguage.english;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Confirm Move-Out (कमरा खाली करें)'),
+        title: Text(isEng ? 'Confirm Move-Out' : 'Confirm Move-Out (कमरा खाली करें)'),
         content: Text(
-          'Kya aap sach mein ${tenant.fullName} ka move-out settle karna chahte hain? Isse Room $roomNumber ka $bedLabel vacant (khali) ho jayega.',
+          isEng
+              ? 'Are you sure you want to settle move-out for ${tenant.fullName}? Room $roomNumber $bedLabel will be marked as vacant.'
+              : 'Kya aap sach mein ${tenant.fullName} ka move-out settle karna chahte hain? Isse Room $roomNumber ka $bedLabel vacant (khali) ho jayega.',
         ),
         actions: [
           TextButton(
@@ -60,6 +65,7 @@ class TenantProfileDialog extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isEng = ref.watch(languageProvider) == AppLanguage.english;
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: ConstrainedBox(
@@ -255,7 +261,7 @@ class TenantProfileDialog extends ConsumerWidget {
 
               // Move-Out Settle Button
               AppButton(
-                label: 'Settle Move-Out (कमरा खाली करें)',
+                label: isEng ? 'Settle Move-Out' : 'Settle Move-Out (कमरा खाली करें)',
                 variant: AppButtonVariant.danger,
                 icon: Icons.logout_rounded,
                 onPressed: () => _moveOut(context, ref),

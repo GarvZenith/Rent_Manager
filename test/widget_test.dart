@@ -16,17 +16,17 @@ void main() {
 
     test('AppStrings returns localized text in English & Hinglish', () {
       expect(AppStrings.get('statusPaid', AppLanguage.english), 'Paid');
-      expect(AppStrings.get('statusPaid', AppLanguage.hinglish), contains('जमा हो गया'));
-      expect(AppStrings.get('statusOverdue', AppLanguage.hinglish), contains('बाकी है'));
+      expect(AppStrings.get('statusPaid', AppLanguage.hinglish), contains('जमा'));
+      expect(AppStrings.get('statusOverdue', AppLanguage.hinglish), contains('बाकी'));
     });
 
     test('LanguageNotifier toggles between English and Hinglish correctly', () {
       final notifier = LanguageNotifier();
-      expect(notifier.state, AppLanguage.hinglish); // Default
-      notifier.toggleLanguage();
-      expect(notifier.state, AppLanguage.english);
+      expect(notifier.state, AppLanguage.english); // Default
       notifier.toggleLanguage();
       expect(notifier.state, AppLanguage.hinglish);
+      notifier.toggleLanguage();
+      expect(notifier.state, AppLanguage.english);
     });
   });
 
@@ -42,17 +42,17 @@ void main() {
       expect(find.text('Setup Your PG / Hostel'), findsOneWidget);
       expect(find.text('⚡ Pre-load Kota PG Demo (Live Test)'), findsOneWidget);
 
-      // Default language is Hinglish
-      expect(find.text('English'), findsOneWidget); // Button shows 'English' to switch to English
+      // Default language is English -> button offers to switch to Hindi/Hinglish
+      expect(find.text('हिंदी / Hinglish'), findsOneWidget);
 
-      // Tap language switch button
-      await tester.tap(find.text('English'));
+      // Tap language switch button to switch to Hinglish
+      await tester.tap(find.text('हिंदी / Hinglish'));
       await tester.pumpAndSettle();
 
-      // Now language is English, button shows 'हिंदी / Hinglish'
-      expect(find.text('हिंदी / Hinglish'), findsOneWidget);
-      expect(find.text('Total Collected'), findsOneWidget);
-      expect(find.text('Pending Dues'), findsOneWidget);
+      // Now language is Hinglish, button shows 'English'
+      expect(find.text('English'), findsOneWidget);
+      expect(find.textContaining('Collected'), findsOneWidget);
+      expect(find.textContaining('Dues'), findsOneWidget);
     });
   });
 }

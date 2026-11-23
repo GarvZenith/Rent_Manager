@@ -10,6 +10,8 @@ import '../../models/bed_model.dart';
 class RoomCard extends StatelessWidget {
   final RoomModel room;
   final InvoiceModel? latestInvoice;
+  final bool isEnglish;
+  final String? customStatusLabel;
   final VoidCallback? onAddReading;
   final VoidCallback? onRecordPayment;
   final VoidCallback? onSendReminder;
@@ -19,6 +21,8 @@ class RoomCard extends StatelessWidget {
     super.key,
     required this.room,
     this.latestInvoice,
+    this.isEnglish = false,
+    this.customStatusLabel,
     this.onAddReading,
     this.onRecordPayment,
     this.onSendReminder,
@@ -46,15 +50,31 @@ class RoomCard extends StatelessWidget {
   }
 
   String get _statusLabel {
+    if (customStatusLabel != null) return customStatusLabel!;
     switch (_status) {
       case RoomPaymentStatus.paid:
-        return 'Paid (जमा)';
+        return isEnglish ? 'Paid' : 'Paid (जमा)';
       case RoomPaymentStatus.overdue:
-        return 'Overdue (बाकी)';
+        return isEnglish ? 'Overdue' : 'Overdue (बाकी)';
       case RoomPaymentStatus.dueToday:
-        return 'Due (देना है)';
+        return isEnglish ? 'Due' : 'Due (देना है)';
       case RoomPaymentStatus.vacant:
-        return 'Vacant (खाली)';
+        return isEnglish ? 'Vacant' : 'Vacant (खाली)';
+    }
+  }
+
+  String _getSharingTitle(RoomSharingType type) {
+    switch (type) {
+      case RoomSharingType.single:
+        return 'Single Bed';
+      case RoomSharingType.doubleSharing:
+        return 'Double Sharing (2 Beds)';
+      case RoomSharingType.tripleSharing:
+        return 'Triple Sharing (3 Beds)';
+      case RoomSharingType.fourPlus:
+        return '4+ Sharing Beds';
+      case RoomSharingType.fullFlat:
+        return 'Full Independent Flat';
     }
   }
 
@@ -251,20 +271,5 @@ class RoomCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _getSharingTitle(RoomSharingType type) {
-    switch (type) {
-      case RoomSharingType.single:
-        return 'Single Bed';
-      case RoomSharingType.doubleSharing:
-        return 'Double Sharing (2 Beds)';
-      case RoomSharingType.tripleSharing:
-        return 'Triple Sharing (3 Beds)';
-      case RoomSharingType.fourPlus:
-        return '4+ Sharing';
-      case RoomSharingType.fullFlat:
-        return 'Full Flat';
-    }
   }
 }

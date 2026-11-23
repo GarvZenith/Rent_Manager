@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/database/rent_khata_repository.dart';
+import '../../../../core/localization/app_strings.dart';
+import '../../../../core/localization/locale_provider.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../models/room_model.dart';
 
@@ -57,6 +59,8 @@ class _AddRoomDialogState extends ConsumerState<AddRoomDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final isEng = ref.watch(languageProvider) == AppLanguage.english;
+
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: SingleChildScrollView(
@@ -70,9 +74,9 @@ class _AddRoomDialogState extends ConsumerState<AddRoomDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Add New Room (नया कमरा)',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                  Text(
+                    isEng ? 'Add New Room' : 'Add New Room (नया कमरा)',
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
                   ),
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
@@ -85,28 +89,33 @@ class _AddRoomDialogState extends ConsumerState<AddRoomDialog> {
               // Room Number
               TextFormField(
                 controller: _roomNumberController,
-                decoration: const InputDecoration(
-                  labelText: 'Room Number (कमरा नं.)',
+                decoration: InputDecoration(
+                  labelText: isEng ? 'Room Number' : 'Room Number (कमरा नं.)',
                   hintText: 'e.g. 101, 204, 302',
-                  prefixIcon: Icon(Icons.tag_rounded),
+                  prefixIcon: const Icon(Icons.tag_rounded),
                 ),
-                validator: (val) => val == null || val.trim().isEmpty ? 'Room number required' : null,
+                validator: (val) => val == null || val.trim().isEmpty
+                    ? (isEng ? 'Room number required' : 'कमरा नंबर आवश्यक है')
+                    : null,
               ),
               const SizedBox(height: 12),
 
               // Sharing Type Selector
-              const Text('Sharing Type (कमरे का प्रकार):', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+              Text(
+                isEng ? 'Sharing Type:' : 'Sharing Type (कमरे का प्रकार):',
+                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+              ),
               const SizedBox(height: 6),
               DropdownButtonFormField<RoomSharingType>(
                 initialValue: _sharingType,
                 decoration: const InputDecoration(
                   prefixIcon: Icon(Icons.people_outline_rounded),
                 ),
-                items: const [
-                  DropdownMenuItem(value: RoomSharingType.single, child: Text('Single (1 Bed)')),
-                  DropdownMenuItem(value: RoomSharingType.doubleSharing, child: Text('Double Sharing (2 Beds)')),
-                  DropdownMenuItem(value: RoomSharingType.tripleSharing, child: Text('Triple Sharing (3 Beds)')),
-                  DropdownMenuItem(value: RoomSharingType.fullFlat, child: Text('Full Flat')),
+                items: [
+                  DropdownMenuItem(value: RoomSharingType.single, child: Text(isEng ? 'Single (1 Bed)' : 'Single (1 Bed)')),
+                  DropdownMenuItem(value: RoomSharingType.doubleSharing, child: Text(isEng ? 'Double Sharing (2 Beds)' : 'Double Sharing (2 Beds)')),
+                  DropdownMenuItem(value: RoomSharingType.tripleSharing, child: Text(isEng ? 'Triple Sharing (3 Beds)' : 'Triple Sharing (3 Beds)')),
+                  DropdownMenuItem(value: RoomSharingType.fullFlat, child: Text(isEng ? 'Full Flat' : 'Full Flat')),
                 ],
                 onChanged: (val) {
                   if (val != null) setState(() => _sharingType = val);
@@ -118,13 +127,13 @@ class _AddRoomDialogState extends ConsumerState<AddRoomDialog> {
               TextFormField(
                 controller: _rentController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Monthly Rent per Bed (₹)',
-                  prefixIcon: Icon(Icons.currency_rupee_rounded),
+                decoration: InputDecoration(
+                  labelText: isEng ? 'Monthly Rent per Bed (₹)' : 'Monthly Rent per Bed (₹) (मासिक किराया)',
+                  prefixIcon: const Icon(Icons.currency_rupee_rounded),
                 ),
                 validator: (val) {
                   final n = double.tryParse(val ?? '');
-                  if (n == null || n <= 0) return 'Valid rent amount required';
+                  if (n == null || n <= 0) return isEng ? 'Valid rent amount required' : 'सही किराया राशि दर्ज करें';
                   return null;
                 },
               ),
@@ -134,17 +143,17 @@ class _AddRoomDialogState extends ConsumerState<AddRoomDialog> {
               TextFormField(
                 controller: _initialReadingController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Current Meter Reading (Units)',
+                decoration: InputDecoration(
+                  labelText: isEng ? 'Current Meter Reading (Units)' : 'Current Meter Reading (Units) (मीटर रीडिंग)',
                   hintText: 'e.g. 1000',
-                  prefixIcon: Icon(Icons.electric_meter_rounded),
+                  prefixIcon: const Icon(Icons.electric_meter_rounded),
                 ),
               ),
               const SizedBox(height: 20),
 
               // Save Button
               AppButton(
-                label: 'Save Room (कमरा जोड़ें)',
+                label: isEng ? 'Save Room' : 'Save Room (कमरा जोड़ें)',
                 icon: Icons.check_rounded,
                 onPressed: _submit,
               ),

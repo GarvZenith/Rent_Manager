@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import '../../features/property/models/property_model.dart';
 import '../../features/room/models/room_model.dart';
@@ -55,14 +57,92 @@ class RentKhataState {
       expenses: expenses ?? this.expenses,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'properties': properties.map((p) => p.toJson()).toList(),
+      'rooms': rooms.map((r) => r.toJson()).toList(),
+      'tenants': tenants.map((t) => t.toJson()).toList(),
+      'leases': leases.map((l) => l.toJson()).toList(),
+      'meterReadings': meterReadings.map((m) => m.toJson()).toList(),
+      'invoices': invoices.map((i) => i.toJson()).toList(),
+      'payments': payments.map((p) => p.toJson()).toList(),
+      'expenses': expenses.map((e) => e.toJson()).toList(),
+    };
+  }
+
+  factory RentKhataState.fromJson(Map<String, dynamic> json) {
+    return RentKhataState(
+      properties: (json['properties'] as List<dynamic>?)
+              ?.map((p) => PropertyModel.fromJson(Map<String, dynamic>.from(p as Map)))
+              .toList() ??
+          const [],
+      rooms: (json['rooms'] as List<dynamic>?)
+              ?.map((r) => RoomModel.fromJson(Map<String, dynamic>.from(r as Map)))
+              .toList() ??
+          const [],
+      tenants: (json['tenants'] as List<dynamic>?)
+              ?.map((t) => TenantModel.fromJson(Map<String, dynamic>.from(t as Map)))
+              .toList() ??
+          const [],
+      leases: (json['leases'] as List<dynamic>?)
+              ?.map((l) => LeaseModel.fromJson(Map<String, dynamic>.from(l as Map)))
+              .toList() ??
+          const [],
+      meterReadings: (json['meterReadings'] as List<dynamic>?)
+              ?.map((m) => MeterReadingModel.fromJson(Map<String, dynamic>.from(m as Map)))
+              .toList() ??
+          const [],
+      invoices: (json['invoices'] as List<dynamic>?)
+              ?.map((i) => InvoiceModel.fromJson(Map<String, dynamic>.from(i as Map)))
+              .toList() ??
+          const [],
+      payments: (json['payments'] as List<dynamic>?)
+              ?.map((p) => PaymentModel.fromJson(Map<String, dynamic>.from(p as Map)))
+              .toList() ??
+          const [],
+      expenses: (json['expenses'] as List<dynamic>?)
+              ?.map((e) => ExpenseModel.fromJson(Map<String, dynamic>.from(e as Map)))
+              .toList() ??
+          const [],
+    );
+  }
 }
 
 /// Offline-first repository managing all real-estate entities, calculations & balances
 class RentKhataRepository extends StateNotifier<RentKhataState> {
+  static const String dbStorageKey = 'rentkhata_database_v1';
   final Uuid _uuid = const Uuid();
+  final bool enablePersistence;
 
-  RentKhataRepository([RentKhataState? initialState])
+  RentKhataRepository([RentKhataState? initialState, this.enablePersistence = true])
       : super(initialState ?? const RentKhataState());
+
+  void _persistState() {
+    if (!enablePersistence) return;
+    try {
+      SharedPreferences.getInstance().then((prefs) {
+        final jsonStr = jsonEncode(state.toJson());
+        prefs.setString(dbStorageKey, jsonStr);
+      }).catchError((_) {});
+    } catch (_) {}
+  }
+
+  Future<void> saveToDisk() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(dbStorageKey, jsonEncode(state.toJson()));
+    } catch (_) {}
+  }
+
+  Future<void> clearAllData() async {
+    state = const RentKhataState();
+    _persistState();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(dbStorageKey);
+    } catch (_) {}
+  }
 
   // ===========================================================================
   // PROPERTY OPERATIONS
@@ -93,6 +173,7 @@ class RentKhataRepository extends StateNotifier<RentKhataState> {
     );
 
     state = state.copyWith(properties: [...state.properties, property]);
+    _persistState();
     return property;
   }
 
@@ -127,6 +208,7 @@ class RentKhataRepository extends StateNotifier<RentKhataState> {
       return p;
     }).toList();
     state = state.copyWith(properties: updatedList);
+    _persistState();
     return updatedList.firstWhere((p) => p.id == propertyId);
   }
 
@@ -175,6 +257,7 @@ class RentKhataRepository extends StateNotifier<RentKhataState> {
     );
 
     state = state.copyWith(rooms: [...state.rooms, room]);
+    _persistState();
     return room;
   }
 
@@ -237,6 +320,7 @@ class RentKhataRepository extends StateNotifier<RentKhataState> {
       leases: [...state.leases, lease],
       rooms: updatedRooms,
     );
+    _persistState();
 
     return (tenant: tenant, lease: lease);
   }
@@ -289,6 +373,7 @@ class RentKhataRepository extends StateNotifier<RentKhataState> {
       leases: updatedLeases,
       tenants: updatedTenants,
     );
+    _persistState();
   }
 
   // ===========================================================================
@@ -339,6 +424,7 @@ class RentKhataRepository extends StateNotifier<RentKhataState> {
       meterReadings: [...state.meterReadings, reading],
       rooms: updatedRooms,
     );
+    _persistState();
 
     return reading;
   }
@@ -384,6 +470,7 @@ class RentKhataRepository extends StateNotifier<RentKhataState> {
     );
 
     state = state.copyWith(invoices: [...state.invoices, invoice]);
+    _persistState();
     return invoice;
   }
 
@@ -427,6 +514,7 @@ class RentKhataRepository extends StateNotifier<RentKhataState> {
 
     if (newInvoices.isNotEmpty) {
       state = state.copyWith(invoices: [...state.invoices, ...newInvoices]);
+      _persistState();
     }
 
     return newInvoices;
@@ -451,6 +539,7 @@ class RentKhataRepository extends StateNotifier<RentKhataState> {
       return inv;
     }).toList();
     state = state.copyWith(invoices: updated);
+    _persistState();
   }
 
   // ===========================================================================
@@ -497,6 +586,7 @@ class RentKhataRepository extends StateNotifier<RentKhataState> {
       payments: [...state.payments, payment],
       invoices: updatedInvoices,
     );
+    _persistState();
 
     return payment;
   }
@@ -509,6 +599,7 @@ class RentKhataRepository extends StateNotifier<RentKhataState> {
       return inv;
     }).toList();
     state = state.copyWith(invoices: updatedInvoices);
+    _persistState();
   }
 
   // ===========================================================================
@@ -574,6 +665,7 @@ class RentKhataRepository extends StateNotifier<RentKhataState> {
     );
 
     state = state.copyWith(expenses: [...state.expenses, expense]);
+    _persistState();
     return expense;
   }
 
@@ -581,6 +673,7 @@ class RentKhataRepository extends StateNotifier<RentKhataState> {
     state = state.copyWith(
       expenses: state.expenses.where((e) => e.id != expenseId).toList(),
     );
+    _persistState();
   }
 
   MonthlyCashFlowSummary getMonthlyCashFlow({

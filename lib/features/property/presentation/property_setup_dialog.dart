@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/database/rent_khata_repository.dart';
+import '../../../../core/localization/app_strings.dart';
+import '../../../../core/localization/locale_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../models/property_model.dart';
@@ -87,8 +89,8 @@ class _PropertySetupDialogState extends ConsumerState<PropertySetupDialog> {
       SnackBar(
         content: Text(
           widget.existingProperty != null
-              ? 'Property details updated!'
-              : '🎉 $name setup ho gaya! Ab rooms add karein.',
+              ? 'Property details updated successfully!'
+              : '🎉 $name setup successfully! Now add rooms.',
         ),
         backgroundColor: AppColors.statusPaid,
       ),
@@ -98,6 +100,7 @@ class _PropertySetupDialogState extends ConsumerState<PropertySetupDialog> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.existingProperty != null;
+    final isEng = ref.watch(languageProvider) == AppLanguage.english;
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -126,7 +129,9 @@ class _PropertySetupDialogState extends ConsumerState<PropertySetupDialog> {
                         ),
                         const SizedBox(width: 12),
                         Text(
-                          isEditing ? 'Edit PG / Property' : 'Setup Your PG / Hostel',
+                          isEditing
+                              ? (isEng ? 'Edit Property' : 'Edit PG / Property')
+                              : (isEng ? 'Setup Your PG / Hostel' : 'Setup Your PG / Hostel'),
                           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                       ],
@@ -140,8 +145,12 @@ class _PropertySetupDialogState extends ConsumerState<PropertySetupDialog> {
                 const SizedBox(height: 8),
                 Text(
                   isEditing
-                      ? 'Apne PG / Hostel ki information update karein.'
-                      : 'Apne PG ka naam aur details bharein. Ye bill aur invoices par dikhai dega.',
+                      ? (isEng
+                          ? 'Update your property name, location, and billing settings.'
+                          : 'Apne PG / Hostel ki information update karein.')
+                      : (isEng
+                          ? 'Enter property name and billing rates. These appear on rent invoices.'
+                          : 'Apne PG ka naam aur details bharein. Ye bill aur invoices par dikhai dega.'),
                   style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: 20),
@@ -149,15 +158,15 @@ class _PropertySetupDialogState extends ConsumerState<PropertySetupDialog> {
                 // Property Name
                 TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'PG / Hostel / Flat Ka Naam *',
+                  decoration: InputDecoration(
+                    labelText: isEng ? 'PG / Hostel / Property Name *' : 'PG / Hostel / Flat Ka Naam *',
                     hintText: 'e.g. Krishna Residency, Sharma Niwas',
-                    prefixIcon: Icon(Icons.business_rounded),
-                    border: OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.business_rounded),
+                    border: const OutlineInputBorder(),
                   ),
                   validator: (val) {
                     if (val == null || val.trim().isEmpty) {
-                      return 'Kripya apne PG ka naam dalein';
+                      return isEng ? 'Property name is required' : 'Kripya apne PG ka naam dalein';
                     }
                     return null;
                   },
@@ -171,15 +180,15 @@ class _PropertySetupDialogState extends ConsumerState<PropertySetupDialog> {
                       flex: 3,
                       child: TextFormField(
                         controller: _cityController,
-                        decoration: const InputDecoration(
-                          labelText: 'City (Shahar) *',
+                        decoration: InputDecoration(
+                          labelText: isEng ? 'City *' : 'City (Shahar) *',
                           hintText: 'e.g. Kota, Delhi, Pune',
-                          prefixIcon: Icon(Icons.location_city_rounded),
-                          border: OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.location_city_rounded),
+                          border: const OutlineInputBorder(),
                         ),
                         validator: (val) {
                           if (val == null || val.trim().isEmpty) {
-                            return 'City dalein';
+                            return isEng ? 'City is required' : 'City dalein';
                           }
                           return null;
                         },
@@ -191,11 +200,11 @@ class _PropertySetupDialogState extends ConsumerState<PropertySetupDialog> {
                       child: TextFormField(
                         controller: _rateController,
                         keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          labelText: 'Bijli Rate (₹/unit)',
+                        decoration: InputDecoration(
+                          labelText: isEng ? 'Power Rate (₹/unit)' : 'Bijli Rate (₹/unit)',
                           hintText: '10',
-                          prefixIcon: Icon(Icons.electric_bolt_rounded),
-                          border: OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.electric_bolt_rounded),
+                          border: const OutlineInputBorder(),
                         ),
                       ),
                     ),
@@ -206,11 +215,11 @@ class _PropertySetupDialogState extends ConsumerState<PropertySetupDialog> {
                 // Address
                 TextFormField(
                   controller: _addressController,
-                  decoration: const InputDecoration(
-                    labelText: 'Area / Colony Address (Optional)',
+                  decoration: InputDecoration(
+                    labelText: isEng ? 'Area / Colony Address (Optional)' : 'Area / Colony Address (Optional)',
                     hintText: 'e.g. Landmark City, Kunhari',
-                    prefixIcon: Icon(Icons.place_rounded),
-                    border: OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.place_rounded),
+                    border: const OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 14),
@@ -218,19 +227,23 @@ class _PropertySetupDialogState extends ConsumerState<PropertySetupDialog> {
                 // UPI VPA for direct rent collection
                 TextFormField(
                   controller: _upiController,
-                  decoration: const InputDecoration(
-                    labelText: 'UPI ID for Rent Collection (Optional)',
+                  decoration: InputDecoration(
+                    labelText: isEng ? 'UPI ID for Rent Collection (Optional)' : 'UPI ID for Rent Collection (Optional)',
                     hintText: 'e.g. yourname@oksbi / paytm',
-                    prefixIcon: Icon(Icons.qr_code_rounded),
-                    helperText: 'Is UPI ID ka auto-QR bill par aayega',
-                    border: OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.qr_code_rounded),
+                    helperText: isEng
+                        ? 'Generates auto QR code on tenant rent bills'
+                        : 'Is UPI ID ka auto-QR bill par aayega',
+                    border: const OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 24),
 
                 // Save Button
                 AppButton(
-                  label: isEditing ? 'Save Changes' : 'Property Save & Continue',
+                  label: isEditing
+                      ? (isEng ? 'Save Changes' : 'Save Changes')
+                      : (isEng ? 'Save Property & Continue' : 'Property Save & Continue'),
                   icon: Icons.check_circle_rounded,
                   onPressed: _submit,
                 ),

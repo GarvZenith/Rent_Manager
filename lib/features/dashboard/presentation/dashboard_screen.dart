@@ -172,7 +172,7 @@ class DashboardScreen extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    property != null ? '${property.name} (${property.city})' : 'Setup Your PG / Hostel',
+                    property != null ? '${property.name} (${property.city})' : ref.tr('setupProperty'),
                     style: const TextStyle(
                       fontSize: 12,
                       color: AppColors.textSecondary,
@@ -193,7 +193,7 @@ class DashboardScreen extends ConsumerWidget {
         actions: [
           // All Invoices button
           IconButton(
-            tooltip: 'All Invoices (सभी बिल)',
+            tooltip: ref.tr('allInvoicesTooltip'),
             icon: const Icon(Icons.receipt_long_rounded, color: AppColors.primary),
             onPressed: () {
               Navigator.of(context).push(
@@ -203,7 +203,7 @@ class DashboardScreen extends ConsumerWidget {
           ),
           // Expense & P&L Ledger button
           IconButton(
-            tooltip: 'Expenses & Net Profit (खर्चे और मुनाफा)',
+            tooltip: ref.tr('expensesTooltip'),
             icon: const Icon(Icons.account_balance_wallet_outlined, color: AppColors.secondary),
             onPressed: () {
               Navigator.of(context).push(
@@ -260,7 +260,7 @@ class DashboardScreen extends ConsumerWidget {
                                 ),
                               ),
                               Text(
-                                '${state.payments.length} Payments Received',
+                                '${state.payments.length} ${ref.tr("paymentsReceived")}',
                                 style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
                               ),
                             ],
@@ -286,7 +286,7 @@ class DashboardScreen extends ConsumerWidget {
                                 ),
                               ),
                               Text(
-                                '${state.invoices.where((i) => i.balanceDue > 0).length} Invoices Pending',
+                                '${state.invoices.where((i) => i.balanceDue > 0).length} ${ref.tr("invoicesPending")}',
                                 style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
                               ),
                             ],
@@ -318,15 +318,15 @@ class DashboardScreen extends ConsumerWidget {
                               MaterialPageRoute(builder: (ctx) => const InvoiceListScreen()),
                             );
                           },
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                             child: Row(
                               children: [
-                                Icon(Icons.receipt_long_rounded, size: 14, color: AppColors.primary),
-                                SizedBox(width: 4),
+                                const Icon(Icons.receipt_long_rounded, size: 14, color: AppColors.primary),
+                                const SizedBox(width: 4),
                                 Text(
-                                  'Invoices (सभी बिल)',
-                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary),
+                                  ref.tr('invoicesLabel'),
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary),
                                 ),
                               ],
                             ),
@@ -339,15 +339,15 @@ class DashboardScreen extends ConsumerWidget {
                               MaterialPageRoute(builder: (ctx) => const ExpenseTrackerScreen()),
                             );
                           },
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                             child: Row(
                               children: [
-                                Icon(Icons.account_balance_wallet_outlined, size: 14, color: AppColors.secondary),
-                                SizedBox(width: 4),
+                                const Icon(Icons.account_balance_wallet_outlined, size: 14, color: AppColors.secondary),
+                                const SizedBox(width: 4),
                                 Text(
-                                  'Expenses & P&L (खर्चे)',
-                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.secondary),
+                                  ref.tr('expensesLabel'),
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.secondary),
                                 ),
                               ],
                             ),
@@ -419,20 +419,20 @@ class DashboardScreen extends ConsumerWidget {
                         child: const Icon(Icons.apartment_rounded, color: AppColors.primary, size: 36),
                       ),
                       const SizedBox(height: 14),
-                      const Text(
-                        'RentKhata mein aapka swaagat hai! 🏠',
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                      Text(
+                        ref.tr('welcomeTitle'),
+                        style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 6),
-                      const Text(
-                        'Apne PG / Hostel ka pehla Room add karein aur kirayedaar ki digital entry shuru karein.',
-                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      Text(
+                        ref.tr('welcomeSubtitle'),
+                        style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 18),
                       AppButton(
-                        label: property == null ? '🏠 Pehla PG / Property Setup Karein' : '+ Pehla Room Add Karein',
+                        label: property == null ? ref.tr('setupFirstProperty') : ref.tr('addFirstRoom'),
                         icon: property == null ? Icons.apartment_rounded : Icons.add_home_rounded,
                         onPressed: () {
                           if (property == null) {
@@ -474,7 +474,7 @@ class DashboardScreen extends ConsumerWidget {
                         if (rooms.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('Pehle ek room add karein, fir kirayedaar onboard karein.'),
+                              content: Text('Please add a room first before onboarding tenants.'),
                               backgroundColor: AppColors.primary,
                             ),
                           );
@@ -486,7 +486,7 @@ class DashboardScreen extends ConsumerWidget {
                         );
                       },
                       icon: const Icon(Icons.person_add_alt_rounded, size: 17, color: AppColors.primary),
-                      label: const Text('Add Tenant', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                      label: Text(ref.tr('addTenantShort'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                     ),
                     ElevatedButton.icon(
                       onPressed: () {
@@ -503,7 +503,7 @@ class DashboardScreen extends ConsumerWidget {
                         }
                       },
                       icon: const Icon(Icons.add, size: 16),
-                      label: const Text('Add Room', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                      label: Text(ref.tr('addRoom'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                         minimumSize: const Size(0, 36),
@@ -522,11 +522,11 @@ class DashboardScreen extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(vertical: 36),
                   child: Column(
                     children: [
-                      Icon(Icons.meeting_room_outlined, size: 48, color: AppColors.textMuted),
+                      const Icon(Icons.meeting_room_outlined, size: 48, color: AppColors.textMuted),
                       const SizedBox(height: 10),
-                      const Text(
-                        'No rooms added yet (अभी कोई कमरा नहीं है)',
-                        style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+                      Text(
+                        ref.tr('noRoomsYet'),
+                        style: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),
@@ -550,6 +550,7 @@ class DashboardScreen extends ConsumerWidget {
                   return RoomCard(
                     room: room,
                     latestInvoice: invoice,
+                    isEnglish: currentLang == AppLanguage.english,
                     onBedTap: (bed) {
                       if (bed.isOccupied) {
                         // Find tenant and lease

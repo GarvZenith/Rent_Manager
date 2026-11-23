@@ -42,8 +42,8 @@ void main() {
       );
 
       // Verify Title & Fields are rendered
-      expect(find.text('Onboard Tenant (नया किरायेदार)'), findsOneWidget);
-      expect(find.text('Tenant Full Name (पूरा नाम)'), findsOneWidget);
+      expect(find.textContaining('Onboard Tenant'), findsOneWidget);
+      expect(find.textContaining('Tenant Full Name'), findsOneWidget);
       expect(find.text('WhatsApp Mobile Number'), findsOneWidget);
 
       // Enter Name
@@ -56,7 +56,7 @@ void main() {
       await tester.pump();
 
       // Tap Complete Onboarding Button
-      final submitBtn = find.text('Complete Onboarding (किरायेदार जोड़ें)');
+      final submitBtn = find.textContaining('Complete Onboarding');
       expect(submitBtn, findsOneWidget);
       await tester.ensureVisible(submitBtn);
       await tester.tap(submitBtn);
@@ -128,15 +128,15 @@ void main() {
       expect(find.text('+91 9829044556'), findsOneWidget);
 
       // Tap Move-Out
-      final moveOutBtn = find.text('Settle Move-Out (कमरा खाली करें)');
+      final moveOutBtn = find.textContaining('Settle Move-Out');
       expect(moveOutBtn, findsOneWidget);
       await tester.ensureVisible(moveOutBtn);
       await tester.tap(moveOutBtn);
       await tester.pumpAndSettle();
 
       // Confirm dialog appears
-      expect(find.text('Confirm Move-Out (कमरा खाली करें)'), findsOneWidget);
-      await tester.tap(find.text('Confirm Move-Out'));
+      expect(find.textContaining('Confirm Move-Out'), findsWidgets);
+      await tester.tap(find.widgetWithText(ElevatedButton, 'Confirm Move-Out'));
       await tester.pumpAndSettle();
 
       // Verify bed is now vacant!

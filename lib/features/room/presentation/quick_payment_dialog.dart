@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/database/rent_khata_repository.dart';
+import '../../../../core/localization/app_strings.dart';
+import '../../../../core/localization/locale_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/app_button.dart';
@@ -68,6 +70,8 @@ class _QuickPaymentDialogState extends ConsumerState<QuickPaymentDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final isEng = ref.watch(languageProvider) == AppLanguage.english;
+
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: SingleChildScrollView(
@@ -111,8 +115,11 @@ class _QuickPaymentDialogState extends ConsumerState<QuickPaymentDialog> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Expanded(
-                    child: Text('Pending Balance (बाकी राशि):', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                  Expanded(
+                    child: Text(
+                      isEng ? 'Pending Balance:' : 'Pending Balance (बाकी राशि):',
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                    ),
                   ),
                   Text(
                     CurrencyFormatter.format(widget.invoice.balanceDue),
